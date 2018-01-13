@@ -1,0 +1,40 @@
+Arguments: 
+  C:\Program Files\nodejs\node.exe C:\Users\Phoenix\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add express body-parser cors
+
+PATH: 
+  C:\mysql\bin;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Python27;C:\Python27\Scripts;C:\Python27\libs;C:\WINDOWS\system32;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files\Git\cmd;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\sqlite;C:\Program Files\dotnet\;C:\multigit;C:\Program Files\nodejs\;C:\Ruby24-x64\bin;C:\Users\Phoenix\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Microsoft VS Code\bin;C:\Users\Phoenix\AppData\Roaming\npm;C:\Program Files (x86)\Nmap;
+
+Yarn version: 
+  1.3.2
+
+Node version: 
+  8.9.1
+
+Platform: 
+  win32 x64
+
+npm manifest: 
+  {
+    "name": "backend",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "ISC",
+    "license": "ISC"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
+
+Trace: 
+  Error: https://registry.yarnpkg.com/express: ETIMEDOUT
+      at Timeout._onTimeout (C:\Users\Phoenix\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:123749:19)
+      at ontimeout (timers.js:475:11)
+      at tryOnTimeout (timers.js:310:5)
+      at Timer.listOnTimeout (timers.js:270:5)
