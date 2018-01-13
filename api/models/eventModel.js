@@ -16,10 +16,15 @@ var EventSchema = new Schema({
         type: String,
         required: true,
     },
+    organiser_name: {
+        type: String,
+        required: true
+    },
     context: {
         type: String,
         required: true,
     },
-    time: Date,
+    time: String,
+    date: String
 })
 module.exports = mongoose.model('Event', EventSchema)

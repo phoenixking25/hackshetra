@@ -5,6 +5,6 @@ var mongoose = require('mongoose'),
 
 var PresenterSchema = new Schema({
     event_id: String,
-    presenter_id: String
+    presenter_username: String
 })
-module.exports = mongoose.model('timeline', PresenterSchema)
+module.exports = mongoose.model('Presenter', PresenterSchema)

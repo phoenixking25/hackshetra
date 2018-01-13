@@ -28,8 +28,10 @@ module.exports = function(app) {
     app.route('/validate')
         .get(engine.validate)
 
-    // app.route('/addPresenter')
-    //     .post(engine.addPresenter)
-    
+    app.route('/users')
+        .get(engine.getUsers)
+
+    app.route('/attend/:id')
+        .get(engine.attendEvent)
 
 }

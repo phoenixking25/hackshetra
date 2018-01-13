@@ -3,6 +3,8 @@
 var mongoose = require("mongoose"),
     User = mongoose.model('User'),
     Events = mongoose.model('Event'),
+    Presenter = mongoose.model('Presenter'),
+    Attendee = mongoose.model('Attendee'),
     auth = require('../utils/authentication')
 
 
@@ -13,7 +15,9 @@ module.exports = {
     },
     
     getEvents: (req, res) => {
+        var array = []
         Events.find({}, (err, result) => {
+            if(err) res.send(err)
             res.status(200).send(result)
         })
     },
@@ -24,46 +28,30 @@ module.exports = {
 
     createEvent: (req, res) => {
         var formData = req.body
-        var data = new Events(formData)
-        data.save((err, result) => {
-            if(err) res.send(err)
-            res.status(200).send({"status": "failure", "data": result})
+        var email = formData.organiser_id
+        User.findOne({email: auth.decrypt(email)}, (err, user) => {
+            formData.organiser_name = user.name
+            var data = new Events(formData)
+            data.save((err, result) => {
+                if(err) res.send(err)
+                var array = {}
+                console.log(formData.presenters)
+                for(var i = 0; i < formData.presenters.length; i++) {
+                    array.event_id = result.id
+                    array.presenter_username = formData.presenters[i]
+                    var pdata = new Presenter(array)
+                    pdata.save((err, resu) => {
+                        if(err) res.send(err)
+                        console.log(resu)
+                        array = {}
+                    })
+                }
+                res.status(200).send({"status": "success", "data": result})
+
+            })
         })
     },
 
-    // generateToken: (req, res) => {
-    //     auth.validateToken(req.body.token, req.body.provider)
-    //         .then((data)=>{
-    //             User.findOne({email: data.email}, (err, user) => {
-    //             var jwtToken = auth.generateJWT(data.email)
-    //             if(err) {
-    //                 console.log(err);
-    //             }
-    //             var result = {}
-    //             if(!player) {
-    //                 if(req.body.provider == 'facebook') {
-    //                     result.picture = data.picture.data.url
-    //                 }
-    //                 else {
-    //                     result.picture = data.picture
-    //                 }
-    //                 result.status = 'failure'
-    //                 result.email = data.email
-    //                 result.name = data.name
-    //                 res.status(403).json(result)
-    //             } else {
-    //                 console.log(data.name + ' is logging in')
-    //                 result.name = player.name
-    //                 result.email = player.email
-    //                 result.picture = player.picture
-    //                 result.phone = player.phone
-    //                 result.jwtToken = jwtToken
-    //                 res.status(200).json(result)
-    //             }
-    //         })
-    //     })
-        
-    // },
     signup: (req, res) => {
         var formData = req.body
         formData.created_at = new Date()
@@ -79,9 +67,12 @@ module.exports = {
         var formData = req.body
         User.findOne({email: formData.email}, (err, result) => {
             if(err) res.send(err)
+            else if(!result) {
+                res.send({"status": "failure"})
+            }
             else if(result.password == formData.password) {
                 var jwtToken = auth.generateJWT(result.email)
-                res.send({"status": "success", "jwtToken": jwtToken})
+                res.send({"status": "success", "jwtToken": jwtToken, "_id": result._id})
             } else {
                 res.send({"status": "failure"})
             }
@@ -90,17 +81,36 @@ module.exports = {
 
     getEvent: (req, res) => {
         var id = req.params.id
-        Events.findById({id: id}, (err, result) => {
+        var obj = {}
+        Events.findById({_id: id}, (err, result) => {
             if(err) res.send(err)
-            res.status(200).send(result)
+            obj.event = result
+            Presenter.find({event_id: id}, (err, pre) => {
+                if(err) res.send(err)
+                obj.presenter = pre
+                Attendee.find({event_id: id}, (err, att) => {
+                    if(err) res.send(err)
+                    obj.attendee = att
+                    User.findOne({email: auth.decrypt(result.organiser_id)}, (err, user) => {
+                        if(err) res.send(err)
+                        obj.Organiser = user
+                        res.send(obj)
+                    })
+                })
+            })
         })
     },
 
     getUser: (req, res) => {
         var id = req.params.id
-        User.findById({email: email}, (err, result) => {
+        var obj = {}
+        User.findById({_id: id}, (err, result) => {
             if(err) res.send(err)
-            res.status(200).send(result)
+            Attendee.find({attendee_username: result.username}, (err, att) => {
+                obj.events = att
+                obj.user = result
+                res.status(200).send(obj)
+            })
         })
     },
 
@@ -108,7 +118,35 @@ module.exports = {
         var email = auth.decrypt(req.headers.jwttoken)
         User.findOne({email: email}, (err, result) => {
             if(err) res.send({"status": "failure"})
-            res.status(200).send({"status": "success"})
+            if(!result) {
+                res.send({"status": "failure"})
+            } else {
+                res.status(200).send({"status": "success"})
+            }
+        })
+    },
+    getUsers: (req, res) => {
+        User.find({}, (err, result) => {
+            if(err) res.send(err)
+            res.send(result)
+        })
+    },
+
+    attendEvent: (req, res) => {
+        var event_id = req.params.id
+        var data = {}
+        User.findOne({email: auth.decrypt(req.headers.jwttoken)}, (err, result) => {
+            if(err) res.send(err)
+            else if(!result) res.send({"status": "failure"})
+            Events.findById({_id: event_id}, (err, eve) => {
+                data.event = eve
+                data.attendee_username = result.username
+                var adata = new Attendee(data)
+                adata.save((err, result) => {
+                    if(err) res.send(err)
+                    res.send({"status":"success"})
+                })
+            })
         })
     }
 }

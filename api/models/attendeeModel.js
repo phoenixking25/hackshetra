@@ -4,7 +4,7 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema
 
 var AttendeeSchema = new Schema({
-    event_id: String,
-    attendee_id: String
+    event: Object,
+    attendee_username: String
 })
-module.exports = mongoose.model('attendee', AttendeeSchema)
+module.exports = mongoose.model('Attendee', AttendeeSchema)
